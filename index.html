@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🌸鼻くそわっしょい🌸</title>
 <style>
-  html,body{margin:0;padding:0;overflow:hidden;height:100%;background:linear-gradient(270deg,#1a001a,#330033,#003300,#001a33,#190033);background-size:1200% 1200%;animation:g 40s ease infinite}
+  html,body{margin:0;padding:0;overflow:hidden;height:100%;background:linear-gradient(270deg,#1a1a2e,#162447,#1f4068,#1b1b2f,#0f0f1f);background-size:1200% 1200%;animation:g 40s ease infinite}
   @keyframes g{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
 .snow{position:absolute;pointer-events:none;font-size:22px;animation:snowfall linear forwards;opacity:0.85;}
@@ -17,19 +17,13 @@
 }
 .ground-snow{position:absolute;bottom:0;width:10px;height:10px;background:rgba(255,255,255,0.9);border-radius:50%;box-shadow:0 0 10px #fff;pointer-events:none;}
 .poop{position:absolute;font-size:16px;color:#ffccff;text-shadow:0 0 5px #fff;cursor:pointer;user-select:none;transition:all 0.6s ease;}
-.face{position:fixed;font-size:45px;color:#fff;text-shadow:0 0 12px #000;pointer-events:none;opacity:0;transition:opacity .4s}
-.flower{position:absolute;font-size:24px;animation:rotateFlower 6s linear infinite;}
-@keyframes rotateFlower{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}} </style>
+.face{position:absolute;font-size:45px;color:#fff;text-shadow:0 0 12px #000;pointer-events:none;opacity:0;transition:opacity .4s} </style>
 
 </head>
 <body>
 
-<div class="face" id="f1">( ´,_ゝ｀)ﾌﾟｯ</div>
-<div class="face" id="f2">バカが押すぅ〜( ´_ゝ｀)</div>
-
 <script>
 const poops = [];
-const flowers = [];
 const pastelColors = ["#ffeef5","#e0ffff","#f0e8ff","#e8fff0","#fff8e8","#fff0ff"];
 let mouseX = 0, mouseY = 0;
 let isMouseActive = false;
@@ -45,18 +39,6 @@ for(let i=0;i<500;i++){
   p.vy = Math.random()*0.4 - 0.2;
   document.body.appendChild(p);
   poops.push(p);
-}
-
-// 花20個生成
-for(let i=0;i<20;i++){
-  const f = document.createElement('div');
-  f.className='flower';
-  f.innerText='✴︎';
-  f.style.left = Math.random()*innerWidth + 'px';
-  f.style.top = Math.random()*innerHeight + 'px';
-  f.style.color = pastelColors[Math.floor(Math.random()*pastelColors.length)];
-  document.body.appendChild(f);
-  flowers.push(f);
 }
 
 // マウス動かなくなったら1秒後に自由漂い再開
@@ -81,6 +63,7 @@ function snow(){
     s.style.setProperty('--swing', (Math.random()*200 - 100)+'px');
     document.body.appendChild(s);
 
+    // 積もる演出
     setTimeout(()=>{
       if(Math.random()<0.65){
         const g = document.createElement('div');
@@ -103,11 +86,13 @@ function animate(){
     let y = parseFloat(p.style.top);
 
     if(isMouseActive){
+      // マウスに吸い寄せ
       const dx = mouseX - x;
       const dy = mouseY - y;
       p.style.left = x + dx*0.018 + 'px';
       p.style.top = y + dy*0.018 + 'px';
     } else {
+      // ほっとくとふわふわ漂う
       x += p.vx;
       y += p.vy;
       if(x<0||x>innerWidth) p.vx *= -1;
@@ -116,30 +101,18 @@ function animate(){
       p.style.top = y+'px';
     }
   });
-
-  flowers.forEach(f=>{
-    let x = parseFloat(f.style.left);
-    let y = parseFloat(f.style.top);
-    x += Math.random()*0.6-0.3;
-    y += Math.random()*0.6-0.3;
-    if(x<0||x>innerWidth) x=Math.random()*innerWidth;
-    if(y<0||y>innerHeight) y=Math.random()*innerHeight;
-    f.style.left = x+'px';
-    f.style.top = y+'px';
-  });
-
   requestAnimationFrame(animate);
 }
 animate();
 
-// クリックで反応（顔文字＆桜）
-document.addEventListener('click', e=>{
+// クリックで反応（顔文字ランダム表示）
+document.addEventListener('click',e=>{
   poops.forEach(p=>{
     const rect = p.getBoundingClientRect();
     const dx = e.clientX - (rect.left + rect.width/2);
     const dy = e.clientY - (rect.top + rect.height/2);
     if(dx*dx + dy*dy < 800){
-      if(Math.random()<1/20){
+      if(Math.random()<1/30){
         // 桜吹雪
         for(let i=0;i<90;i++){
           const sakura = document.createElement('div');
@@ -154,15 +127,13 @@ document.addEventListener('click', e=>{
           setTimeout(()=>sakura.remove(),6000);
         }
       } else {
-        // ランダム位置で顔文字
-        const randomFace = Math.random()<0.88?'f1':'f2';
-        const f = document.getElementById(randomFace);
-        const offsetX = (Math.random()-0.5)*80;
-        const offsetY = (Math.random()-0.5)*80;
-        f.style.left = (e.clientX + offsetX)+'px';
-        f.style.top = (e.clientY + offsetY)+'px';
-        f.style.opacity = 1;
-        setTimeout(()=>f.style.opacity=0,900);
+        const f = document.createElement('div');
+        f.className='face';
+        f.innerText = Math.random()<0.1 ? 'バカが押すぅ〜( ´_ゝ｀)' : '( ´,_ゝ｀)ﾌﾟｯ';
+        f.style.left = e.clientX + (Math.random()*80-40) + 'px';
+        f.style.top = e.clientY + (Math.random()*80-40) + 'px';
+        document.body.appendChild(f);
+        setTimeout(()=>f.remove(),900);
       }
     }
   });
