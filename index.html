@@ -6,17 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🌸鼻くそわっしょい🌸</title>
 <style>
-html,body{
-  margin:0;padding:0;overflow:hidden;height:100%;
-  background: linear-gradient(270deg,#442244,#223344,#334422,#443322,#332244);
-  background-size:1200% 1200%;
-  animation: gradientShift 40s ease infinite;
-}
-@keyframes gradientShift{
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
-}
+  html,body{margin:0;padding:0;overflow:hidden;height:100%;background:linear-gradient(270deg,#1a001a,#330033,#003300,#001a33,#190033);background-size:1200% 1200%;animation:g 40s ease infinite}
+  @keyframes g{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
 .snow{position:absolute;pointer-events:none;font-size:22px;animation:snowfall linear forwards;opacity:0.85;}
 @keyframes snowfall{
@@ -26,55 +17,76 @@ html,body{
 }
 .ground-snow{position:absolute;bottom:0;width:10px;height:10px;background:rgba(255,255,255,0.9);border-radius:50%;box-shadow:0 0 10px #fff;pointer-events:none;}
 .poop{position:absolute;font-size:16px;color:#ffccff;text-shadow:0 0 5px #fff;cursor:pointer;user-select:none;transition:all 0.6s ease;}
-.face{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:45px;color:#fff;text-shadow:0 0 12px #000;pointer-events:none;opacity:0;transition:opacity .4s} </style>
+.face{position:fixed;font-size:45px;color:#fff;text-shadow:0 0 12px #000;pointer-events:none;opacity:0;transition:opacity .4s}
+.flower{position:absolute;font-size:24px;animation:rotateFlower 6s linear infinite;}
+@keyframes rotateFlower{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}} </style>
 
 </head>
 <body>
 
-<div class="face" id="f1">バカが押すぅ〜( ´,_ゝ｀)ﾌﾟｯ</div>
+<div class="face" id="f1">( ´,_ゝ｀)ﾌﾟｯ</div>
+<div class="face" id="f2">バカが押すぅ〜( ´_ゝ｀)</div>
 
 <script>
-const poops=[];
-const pastelColors=["#ffeef5","#e0ffff","#f0e8ff","#e8fff0","#fff8e8","#fff0ff"];
-let mouseX=0,mouseY=0,isMouseActive=false;
+const poops = [];
+const flowers = [];
+const pastelColors = ["#ffeef5","#e0ffff","#f0e8ff","#e8fff0","#fff8e8","#fff0ff"];
+let mouseX = 0, mouseY = 0;
+let isMouseActive = false;
 
+// 鼻くそ500匹生成
 for(let i=0;i<500;i++){
-  const p=document.createElement('div');
+  const p = document.createElement('div');
   p.className='poop';
   p.innerText='💩';
-  p.style.left=Math.random()*innerWidth+'px';
-  p.style.top=Math.random()*innerHeight+'px';
-  p.vx=Math.random()*0.4-0.2;
-  p.vy=Math.random()*0.4-0.2;
+  p.style.left = Math.random()*innerWidth + 'px';
+  p.style.top = Math.random()*innerHeight + 'px';
+  p.vx = Math.random()*0.4 - 0.2;
+  p.vy = Math.random()*0.4 - 0.2;
   document.body.appendChild(p);
   poops.push(p);
 }
 
-document.addEventListener('mousemove', e=>{
-  mouseX=e.clientX; mouseY=e.clientY; isMouseActive=true;
+// 花20個生成
+for(let i=0;i<20;i++){
+  const f = document.createElement('div');
+  f.className='flower';
+  f.innerText='✴︎';
+  f.style.left = Math.random()*innerWidth + 'px';
+  f.style.top = Math.random()*innerHeight + 'px';
+  f.style.color = pastelColors[Math.floor(Math.random()*pastelColors.length)];
+  document.body.appendChild(f);
+  flowers.push(f);
+}
+
+// マウス動かなくなったら1秒後に自由漂い再開
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  isMouseActive = true;
   clearTimeout(window.mouseTimer);
-  window.mouseTimer=setTimeout(()=>isMouseActive=false,1000);
+  window.mouseTimer = setTimeout(()=> isMouseActive = false, 1000);
 });
 
+// 雪降らせ
 function snow(){
   for(let i=0;i<8;i++){
-    const s=document.createElement('div');
+    const s = document.createElement('div');
     s.className='snow';
-    s.innerText=['❄','❅','❆','✴','✿'][Math.floor(Math.random()*5)];
-    s.style.color=pastelColors[Math.floor(Math.random()*pastelColors.length)];
-    s.style.left=Math.random()*innerWidth+'px';
-    s.style.fontSize=Math.random()*14+18+'px';
-    const dur=Math.random()*10+15;
-    s.style.animationDuration=dur+'s';
-    s.style.setProperty('--swing',(Math.random()*200-100)+'px');
+    s.innerText = ['❄','❅','❆','✴','✿'][Math.floor(Math.random()*5)];
+    s.style.color = pastelColors[Math.floor(Math.random()*pastelColors.length)];
+    s.style.left = Math.random()*innerWidth + 'px';
+    s.style.fontSize = Math.random()*14 + 18 + 'px';
+    const dur = Math.random()*10 + 15;
+    s.style.animationDuration = dur +'s';
+    s.style.setProperty('--swing', (Math.random()*200 - 100)+'px');
     document.body.appendChild(s);
 
     setTimeout(()=>{
       if(Math.random()<0.65){
-        const g=document.createElement('div');
+        const g = document.createElement('div');
         g.className='ground-snow';
-        g.style.left=parseFloat(s.style.left)+parseFloat(getComputedStyle(s).getPropertyValue('--swing')||0)+'px';
-        g.style.opacity=Math.random()*0.5+0.5;
+        g.style.left = parseFloat(s.style.left) + parseFloat(getComputedStyle(s).getPropertyValue('--swing')||0) + 'px';
+        g.style.opacity = Math.random()*0.5 + 0.5;
         document.body.appendChild(g);
         setTimeout(()=>g.remove(),12000);
       }
@@ -84,50 +96,73 @@ function snow(){
 setInterval(snow,350);
 snow();
 
+// 鼻くそ挙動
 function animate(){
   poops.forEach(p=>{
-    let x=parseFloat(p.style.left);
-    let y=parseFloat(p.style.top);
+    let x = parseFloat(p.style.left);
+    let y = parseFloat(p.style.top);
+
     if(isMouseActive){
-      const dx=mouseX-x;
-      const dy=mouseY-y;
-      p.style.left=x+dx*0.018+'px';
-      p.style.top=y+dy*0.018+'px';
+      const dx = mouseX - x;
+      const dy = mouseY - y;
+      p.style.left = x + dx*0.018 + 'px';
+      p.style.top = y + dy*0.018 + 'px';
     } else {
-      x+=p.vx; y+=p.vy;
-      if(x<0||x>innerWidth)p.vx*=-1;
-      if(y<0||y>innerHeight)p.vy*=-1;
-      p.style.left=x+'px';
-      p.style.top=y+'px';
+      x += p.vx;
+      y += p.vy;
+      if(x<0||x>innerWidth) p.vx *= -1;
+      if(y<0||y>innerHeight) p.vy *= -1;
+      p.style.left = x+'px';
+      p.style.top = y+'px';
     }
   });
+
+  flowers.forEach(f=>{
+    let x = parseFloat(f.style.left);
+    let y = parseFloat(f.style.top);
+    x += Math.random()*0.6-0.3;
+    y += Math.random()*0.6-0.3;
+    if(x<0||x>innerWidth) x=Math.random()*innerWidth;
+    if(y<0||y>innerHeight) y=Math.random()*innerHeight;
+    f.style.left = x+'px';
+    f.style.top = y+'px';
+  });
+
   requestAnimationFrame(animate);
 }
 animate();
 
+// クリックで反応（顔文字＆桜）
 document.addEventListener('click', e=>{
   poops.forEach(p=>{
-    const rect=p.getBoundingClientRect();
-    const dx=e.clientX-(rect.left+rect.width/2);
-    const dy=e.clientY-(rect.top+rect.height/2);
-    if(dx*dx+dy*dy<800){
+    const rect = p.getBoundingClientRect();
+    const dx = e.clientX - (rect.left + rect.width/2);
+    const dy = e.clientY - (rect.top + rect.height/2);
+    if(dx*dx + dy*dy < 800){
       if(Math.random()<1/20){
+        // 桜吹雪
         for(let i=0;i<90;i++){
-          const sakura=document.createElement('div');
+          const sakura = document.createElement('div');
           sakura.className='snow';
           sakura.innerText='🌸';
-          sakura.style.left=e.clientX+Math.random()*200-100+'px';
-          sakura.style.top=e.clientY+Math.random()*100-50+'px';
-          sakura.style.color='#ffb6c1';
-          sakura.style.fontSize=Math.random()*12+18+'px';
-          sakura.style.animationDuration=Math.random()*3+3+'s';
+          sakura.style.left = e.clientX + Math.random()*200-100 +'px';
+          sakura.style.top = e.clientY + Math.random()*100-50 +'px';
+          sakura.style.color = '#ffb6c1';
+          sakura.style.fontSize = Math.random()*12 + 18 +'px';
+          sakura.style.animationDuration = Math.random()*3 + 3 +'s';
           document.body.appendChild(sakura);
           setTimeout(()=>sakura.remove(),6000);
         }
       } else {
-        const f=Math.random()<0.88?'f1':'f2';
-        document.getElementById(f).style.opacity=1;
-        setTimeout(()=>document.getElementById(f).style.opacity=0,900);
+        // ランダム位置で顔文字
+        const randomFace = Math.random()<0.88?'f1':'f2';
+        const f = document.getElementById(randomFace);
+        const offsetX = (Math.random()-0.5)*80;
+        const offsetY = (Math.random()-0.5)*80;
+        f.style.left = (e.clientX + offsetX)+'px';
+        f.style.top = (e.clientY + offsetY)+'px';
+        f.style.opacity = 1;
+        setTimeout(()=>f.style.opacity=0,900);
       }
     }
   });
