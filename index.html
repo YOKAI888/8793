@@ -1,24 +1,23 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌸鼻くそわっしょい🌸</title>
+<title>🌸鼻くそわっしょい🌸(改)</title>
 <style>
   html,body{margin:0;padding:0;overflow:hidden;height:100%;background:linear-gradient(270deg,#1a1a2e,#162447,#1f4068,#1b1b2f,#0f0f1f);background-size:1200% 1200%;animation:g 40s ease infinite}
   @keyframes g{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-.snow{position:absolute;pointer-events:none;font-size:22px;animation:snowfall linear forwards;opacity:0.85;}
-@keyframes snowfall{
-0%{transform:translateY(-100px) translateX(0) rotate(0deg);opacity:0}
-10%{opacity:0.85}
-100%{transform:translateY(calc(100vh + 100px)) translateX(var(--swing)) rotate(360deg);opacity:0}
-}
-.ground-snow{position:absolute;bottom:0;width:10px;height:10px;background:rgba(255,255,255,0.9);border-radius:50%;box-shadow:0 0 10px #fff;pointer-events:none;}
-.poop{position:absolute;font-size:16px;color:#ffccff;text-shadow:0 0 5px #fff;cursor:pointer;user-select:none;transition:all 0.6s ease;}
-.face{position:absolute;font-size:45px;color:#fff;text-shadow:0 0 12px #000;pointer-events:none;opacity:0;transition:opacity .4s} </style>
-
+  .snow{position:absolute;pointer-events:none;font-size:22px;animation:snowfall linear forwards;opacity:0.85;}
+  @keyframes snowfall{
+    0%{transform:translateY(-100px) translateX(0) rotate(0deg);opacity:0}
+    10%{opacity:0.85}
+    100%{transform:translateY(calc(100vh + 100px)) translateX(var(--swing)) rotate(360deg);opacity:0}
+  }
+  .ground-snow{position:absolute;bottom:0;width:10px;height:10px;background:rgba(255,255,255,0.9);border-radius:50%;box-shadow:0 0 10px #fff;pointer-events:none;}
+  .poop{position:absolute;font-size:16px;color:#ffccff;text-shadow:0 0 5px #fff;cursor:pointer;user-select:none;will-change: transform;} /* 高速化の呪文 */
+  .face{position:absolute;font-size:45px;color:#fff;text-shadow:0 0 12px #000;pointer-events:none;z-index:100;}
+</style>
 </head>
 <body>
 
@@ -27,21 +26,23 @@ const poops = [];
 const pastelColors = ["#ffeef5","#e0ffff","#f0e8ff","#e8fff0","#fff8e8","#fff0ff"];
 let mouseX = 0, mouseY = 0;
 let isMouseActive = false;
+let groundSnowCount = 0; // 積雪制限用
 
-// 鼻くそ500匹生成
-for(let i=0;i<500;i++){
+// 💩生成 (300匹くらいが一番美しいと判断しました)
+for(let i=0;i<300;i++){
   const p = document.createElement('div');
   p.className='poop';
   p.innerText='💩';
-  p.style.left = Math.random()*innerWidth + 'px';
-  p.style.top = Math.random()*innerHeight + 'px';
-  p.vx = Math.random()*0.4 - 0.2;
-  p.vy = Math.random()*0.4 - 0.2;
+  p.x = Math.random()*window.innerWidth;
+  p.y = Math.random()*window.innerHeight;
+  p.vx = Math.random()*0.8 - 0.4;
+  p.vy = Math.random()*0.8 - 0.4;
+  p.style.left = p.x + 'px';
+  p.style.top = p.y + 'px';
   document.body.appendChild(p);
   poops.push(p);
 }
 
-// マウス動かなくなったら1秒後に自由漂い再開
 document.addEventListener('mousemove', e => {
   mouseX = e.clientX; mouseY = e.clientY;
   isMouseActive = true;
@@ -49,96 +50,97 @@ document.addEventListener('mousemove', e => {
   window.mouseTimer = setTimeout(()=> isMouseActive = false, 1000);
 });
 
-// 雪降らせ
+// 雪降らせ（後片付け機能付き）
 function snow(){
-  for(let i=0;i<8;i++){
+  for(let i=0;i<6;i++){
     const s = document.createElement('div');
     s.className='snow';
     s.innerText = ['❄','❅','❆','✴','✿'][Math.floor(Math.random()*5)];
     s.style.color = pastelColors[Math.floor(Math.random()*pastelColors.length)];
-    s.style.left = Math.random()*innerWidth + 'px';
+    const startX = Math.random()*window.innerWidth;
+    s.style.left = startX + 'px';
     s.style.fontSize = Math.random()*14 + 18 + 'px';
-    const dur = Math.random()*10 + 15;
+    const dur = Math.random()*8 + 10;
     s.style.animationDuration = dur +'s';
-    s.style.setProperty('--swing', (Math.random()*200 - 100)+'px');
+    const swing = Math.random()*200 - 100;
+    s.style.setProperty('--swing', swing +'px');
     document.body.appendChild(s);
 
-    // 積もる演出
-    setTimeout(()=>{
-      if(Math.random()<0.65){
+    // アニメ終了時に確実に削除
+    setTimeout(() => {
+      s.remove();
+      // 確率で積もる
+      if(Math.random()<0.4 && groundSnowCount < 200){
         const g = document.createElement('div');
         g.className='ground-snow';
-        g.style.left = parseFloat(s.style.left) + parseFloat(getComputedStyle(s).getPropertyValue('--swing')||0) + 'px';
+        g.style.left = (startX + swing) + 'px';
         g.style.opacity = Math.random()*0.5 + 0.5;
         document.body.appendChild(g);
-        setTimeout(()=>g.remove(),12000);
+        groundSnowCount++;
+        setTimeout(() => { g.remove(); groundSnowCount--; }, 8000);
       }
-    },dur*1000);
+    }, dur * 1000);
   }
 }
-setInterval(snow,350);
-snow();
+setInterval(snow, 500);
 
-// 鼻くそ挙動
+// 挙動（計算を軽く）
 function animate(){
   poops.forEach(p=>{
-    let x = parseFloat(p.style.left);
-    let y = parseFloat(p.style.top);
-
     if(isMouseActive){
-      // マウスに吸い寄せ
-      const dx = mouseX - x;
-      const dy = mouseY - y;
-      p.style.left = x + dx*0.018 + 'px';
-      p.style.top = y + dy*0.018 + 'px';
+      p.x += (mouseX - p.x) * 0.02;
+      p.y += (mouseY - p.y) * 0.02;
     } else {
-      // ほっとくとふわふわ漂う
-      x += p.vx;
-      y += p.vy;
-      if(x<0||x>innerWidth) p.vx *= -1;
-      if(y<0||y>innerHeight) p.vy *= -1;
-      p.style.left = x+'px';
-      p.style.top = y+'px';
+      p.x += p.vx;
+      p.y += p.vy;
+      if(p.x<0||p.x>window.innerWidth) p.vx *= -1;
+      if(p.y<0||p.y>window.innerHeight) p.vy *= -1;
     }
+    p.style.left = p.x + 'px';
+    p.style.top = p.y + 'px';
   });
   requestAnimationFrame(animate);
 }
 animate();
 
-// クリックで反応（顔文字ランダム表示）
-document.addEventListener('click',e=>{
-  poops.forEach(p=>{
-    const rect = p.getBoundingClientRect();
-    const dx = e.clientX - (rect.left + rect.width/2);
-    const dy = e.clientY - (rect.top + rect.height/2);
-    if(dx*dx + dy*dy < 800){
-      if(Math.random()<1/30){
-        // 桜吹雪
-        for(let i=0;i<90;i++){
-          const sakura = document.createElement('div');
-          sakura.className='snow';
-          sakura.innerText='🌸';
-          sakura.style.left = e.clientX + Math.random()*200-100 +'px';
-          sakura.style.top = e.clientY + Math.random()*100-50 +'px';
-          sakura.style.color = '#ffb6c1';
-          sakura.style.fontSize = Math.random()*12 + 18 +'px';
-          sakura.style.animationDuration = Math.random()*3 + 3 +'s';
-          document.body.appendChild(sakura);
-          setTimeout(()=>sakura.remove(),6000);
-        }
-      } else {
-        const f = document.createElement('div');
-        f.className='face';
-        f.innerText = Math.random()<0.1 ? 'バカが押すぅ〜( ´_ゝ｀)' : '( ´,_ゝ｀)ﾌﾟｯ';
-        f.style.left = e.clientX + (Math.random()*80-40) + 'px';
-        f.style.top = e.clientY + (Math.random()*80-40) + 'px';
-        document.body.appendChild(f);
-        setTimeout(()=>f.remove(),900);
-      }
+// クリック反応（桜のゴミ掃除も完璧に）
+document.addEventListener('click', e=>{
+  const clickX = e.clientX;
+  const clickY = e.clientY;
+
+  // 近くの💩を判定（全件ループは変えず、処理を軽く）
+  let hit = false;
+  poops.forEach(p => {
+    const dx = clickX - p.x;
+    const dy = clickY - p.y;
+    if(dx*dx + dy*dy < 2500){ // 判定距離を少し調整
+      hit = true;
     }
   });
+
+  if(hit){
+    if(Math.random() < 0.15){ // 桜吹雪の確率を少し調整
+      for(let i=0;i<40;i++){
+        const sakura = document.createElement('div');
+        sakura.className='snow';
+        sakura.innerText='🌸';
+        sakura.style.left = clickX + (Math.random()*200-100) +'px';
+        sakura.style.top = clickY + (Math.random()*100-50) +'px';
+        sakura.style.animationDuration = (Math.random()*3 + 2) +'s';
+        document.body.appendChild(sakura);
+        setTimeout(()=>sakura.remove(), 4000);
+      }
+    } else {
+      const f = document.createElement('div');
+      f.className='face';
+      f.innerText = Math.random()<0.1 ? 'バカが押すぅ〜( ´_ゝ｀)' : '( ´,_ゝ｀)ﾌﾟｯ';
+      f.style.left = clickX + 'px';
+      f.style.top = clickY + 'px';
+      document.body.appendChild(f);
+      setTimeout(()=>f.remove(), 800);
+    }
+  }
 });
 </script>
-
 </body>
 </html>
