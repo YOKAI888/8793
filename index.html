@@ -3,25 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌸鼻くそわっしょい：宝石の離散と集合🌸</title>
+<title>🌸鼻くそわっしょい：爆速・宝石💩🌸</title>
 <style>
   html,body{margin:0;padding:0;overflow:hidden;height:100%;background:linear-gradient(270deg,#1a1a2e,#162447,#1f4068,#1b1b2f,#0f0f1f);background-size:1200% 1200%;animation:g 40s ease infinite}
   @keyframes g{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-  .snow{position:absolute;pointer-events:none;font-size:22px;animation:snowfall linear forwards;opacity:0.85;}
+  .snow{position:absolute;pointer-events:none;font-size:22px;animation:snowfall linear forwards;color: white; text-shadow: 0 0 10px #fff;}
   @keyframes snowfall{
     0%{transform:translateY(-100px) translateX(0) rotate(0deg);opacity:0}
     10%{opacity:0.85}
     100%{transform:translateY(calc(100vh + 100px)) translateX(var(--swing)) rotate(360deg);opacity:0}
   }
-  .ground-snow{position:absolute;bottom:0;width:10px;height:10px;background:rgba(255,255,255,0.9);border-radius:50%;box-shadow:0 0 10px #fff;pointer-events:none;}
-  
-  /* 💩 スタイル： will-changeで爆速化 */
-  .poop {
-    position:absolute; font-size:18px; cursor:pointer; user-select:none; 
-    will-change: left, top; transition: opacity 0.6s ease;
+
+  .poop-container {
+    position:absolute; width: 30px; height: 30px; 
+    display: flex; align-items: center; justify-content: center;
+    will-change: transform; pointer-events: auto;
   }
-  
+
+  /* 💩本体：フィルターを使わず、後ろの光を透かせる */
+  .poop-inner {
+    font-size: 24px; position: relative; z-index: 2; cursor: pointer;
+  }
+
+  /* 💩の後ろで輝く宝石の光：こいつが色をつける */
+  .poop-light {
+    position: absolute; width: 20px; height: 20px; border-radius: 50%;
+    filter: blur(8px); /* ぼかしは静止画として処理されるので軽い */
+    z-index: 1; opacity: 0.8;
+  }
+
   .face{position:absolute;font-size:45px;color:#fff;text-shadow:0 0 12px #000;pointer-events:none;z-index:100;}
 </style>
 </head>
@@ -29,30 +40,35 @@
 
 <script>
 const poops = [];
-// きいちゃんの気分を上げる宝石のようなパレット
-const colors = ["#ffccff", "#e0ffff", "#f0e8ff", "#e8fff0", "#fff8e8", "#ffd1dc", "#b3e5fc", "#d1c4e9"];
+const jewelColors = ["#ff99cc", "#99ffff", "#cc99ff", "#99ffcc", "#ffff99", "#ffcc99"];
 let mouseX = 0, mouseY = 0;
 let isMouseActive = false;
-let groundSnowCount = 0;
 
-// 💩生成：カラフル仕様
-for(let i=0; i<300; i++){
-  const p = document.createElement('div');
-  p.className='poop';
-  p.innerText='💩';
+// 💩生成：コンテナ方式で軽量化
+for(let i=0; i<250; i++){ // 少し数を絞ってさらに快適に
+  const container = document.createElement('div');
+  container.className = 'poop-container';
   
-  // ランダムな色と、それに合わせた光を付与
-  const color = colors[Math.floor(Math.random() * colors.length)];
-  p.style.color = color;
-  p.style.textShadow = `0 0 8px ${color}`;
+  const light = document.createElement('div');
+  light.className = 'poop-light';
+  light.style.backgroundColor = jewelColors[Math.floor(Math.random() * jewelColors.length)];
   
-  p.x = Math.random() * window.innerWidth;
-  p.y = Math.random() * window.innerHeight;
-  // 離散するときの個性を出すために速度をランダムに
-  p.vx = Math.random() * 1.2 - 0.6;
-  p.vy = Math.random() * 1.2 - 0.6;
+  const inner = document.createElement('div');
+  inner.className = 'poop-inner';
+  inner.innerText = '💩';
+
+  container.appendChild(light);
+  container.appendChild(inner);
   
-  document.body.appendChild(p);
+  const p = {
+    el: container,
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    vx: Math.random() * 1.4 - 0.7,
+    vy: Math.random() * 1.4 - 0.7
+  };
+  
+  document.body.appendChild(container);
   poops.push(p);
 }
 
@@ -60,91 +76,58 @@ document.addEventListener('mousemove', e => {
   mouseX = e.clientX; mouseY = e.clientY;
   isMouseActive = true;
   clearTimeout(window.mouseTimer);
-  window.mouseTimer = setTimeout(()=> isMouseActive = false, 1200); // 1.2秒後に離散開始
+  window.mouseTimer = setTimeout(()=> isMouseActive = false, 1000);
 });
 
-// 雪降らせ（掃除機能つき）
 function snow(){
-  for(let i=0; i<6; i++){
+  for(let i=0; i<4; i++){
     const s = document.createElement('div');
     s.className='snow';
     s.innerText = ['❄','❅','❆','✴','✿'][Math.floor(Math.random()*5)];
-    s.style.color = colors[Math.floor(Math.random()*colors.length)];
-    const startX = Math.random() * window.innerWidth;
-    s.style.left = startX + 'px';
+    s.style.left = Math.random() * window.innerWidth + 'px';
     const dur = Math.random() * 8 + 10;
     s.style.animationDuration = dur +'s';
-    const swing = Math.random() * 200 - 100;
-    s.style.setProperty('--swing', swing + 'px');
+    s.style.setProperty('--swing', (Math.random() * 200 - 100) + 'px');
     document.body.appendChild(s);
-
-    setTimeout(() => {
-      s.remove();
-      if(Math.random() < 0.3 && groundSnowCount < 150){
-        const g = document.createElement('div');
-        g.className='ground-snow';
-        g.style.left = (startX + swing) + 'px';
-        document.body.appendChild(g);
-        groundSnowCount++;
-        setTimeout(() => { g.remove(); groundSnowCount--; }, 10000);
-      }
-    }, dur * 1000);
+    setTimeout(() => s.remove(), dur * 1000);
   }
 }
-setInterval(snow, 600);
+setInterval(snow, 800);
 
-// アニメーション：集合と離散の美学
 function animate(){
   poops.forEach(p => {
     if(isMouseActive){
-      // マウスへ吸い寄せ（集合）
-      p.x += (mouseX - p.x) * 0.03;
-      p.y += (mouseY - p.y) * 0.03;
+      p.x += (mouseX - p.x) * 0.04;
+      p.y += (mouseY - p.y) * 0.04;
     } else {
-      // 自由意志による漂い（離散）
       p.x += p.vx;
       p.y += p.vy;
-      // 画面端で跳ね返る
       if(p.x < 0 || p.x > window.innerWidth) p.vx *= -1;
       if(p.y < 0 || p.y > window.innerHeight) p.vy *= -1;
     }
-    p.style.left = p.x + 'px';
-    p.style.top = p.y + 'px';
+    // transformを使うことでCPUではなくGPUに仕事を投げる
+    p.el.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
   });
   requestAnimationFrame(animate);
 }
 animate();
 
-// クリック反応：桜吹雪
 document.addEventListener('click', e => {
   let hit = false;
   poops.forEach(p => {
     const dx = e.clientX - p.x;
     const dy = e.clientY - p.y;
-    if(dx*dx + dy*dy < 3000) hit = true;
+    if(dx*dx + dy*dy < 4000) hit = true;
   });
 
   if(hit){
-    if(Math.random() < 0.2){
-      for(let i=0; i<50; i++){
-        const sakura = document.createElement('div');
-        sakura.className='snow';
-        sakura.innerText='🌸';
-        sakura.style.left = e.clientX + (Math.random()*200-100) +'px';
-        sakura.style.top = e.clientY + (Math.random()*100-50) +'px';
-        sakura.style.animationDuration = (Math.random()*3 + 2) +'s';
-        document.body.appendChild(sakura);
-        setTimeout(() => sakura.remove(), 4000);
-      }
-    } else {
-      const f = document.createElement('div');
-      f.className='face';
-      f.innerText = Math.random() < 0.1 ? 'バカが押すぅ〜( ´_ゝ｀)' : '( ´,_ゝ｀)ﾌﾟｯ';
-      f.style.left = e.clientX + 'px';
-      f.style.top = e.clientY + 'px';
-      document.body.appendChild(f);
-      setTimeout(() => f.remove(), 800);
-    }
+    const f = document.createElement('div');
+    f.className='face';
+    f.innerText = Math.random() < 0.1 ? 'バカが押すぅ〜( ´_ゝ｀)' : '( ´,_ゝ｀)ﾌﾟｯ';
+    f.style.left = e.clientX + 'px';
+    f.style.top = e.clientY + 'px';
+    document.body.appendChild(f);
+    setTimeout(() => f.remove(), 800);
   }
 });
 </script>
